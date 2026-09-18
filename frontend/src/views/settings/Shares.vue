@@ -21,7 +21,7 @@
 
             <tr v-for="link in links" :key="link.hash">
               <td>
-                <a :href="buildLink(link)" target="_blank">{{ link.path }}</a>
+                <a :href="buildLink(link)" target="_blank" @click="selectShare(link)">{{ link.path }}</a>
               </td>
               <td>
                 <template v-if="link.expire !== 0">{{
@@ -45,13 +45,18 @@
                   class="action copy-clipboard"
                   :aria-label="t('buttons.copyToClipboard')"
                   :title="t('buttons.copyToClipboard')"
-                  @click="copyToClipboard(buildLink(link))"
+                  @click="copyToClipboard(buildLink(link)); selectShare(link)"
                 >
                   <i class="material-icons">content_paste</i>
                 </button>
               </td>
             </tr>
           </table>
+
+          <div v-if="qrLink" class="share-qr">
+            <qrcode-vue :value="qrLink" :size="160" level="M"></qrcode-vue>
+            <div class="share-qr__url">{{ qrLink }}</div>
+          </div>
         </div>
         <h2 class="message" v-else>
           <i class="material-icons">sentiment_dissatisfied</i>
@@ -72,6 +77,7 @@ import { inject, ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { StatusError } from "@/api/utils";
 import { copy } from "@/utils/clipboard";
+import QrcodeVue from "qrcode.vue";
 
 const $showError = inject<IToastError>("$showError")!;
 const $showSuccess = inject<IToastSuccess>("$showSuccess")!;
@@ -82,6 +88,7 @@ const authStore = useAuthStore();
 
 const error = ref<StatusError | null>(null);
 const links = ref<Share[]>([]);
+const qrLink = ref("");
 
 onMounted(async () => {
   layoutStore.loading = true;
@@ -153,7 +160,28 @@ const humanTime = (time: number) => {
   return dayjs(time * 1000).fromNow();
 };
 
+const selectShare = (share: Share) => {
+  qrLink.value = buildLink(share);
+};
+
 const buildLink = (share: Share) => {
   return api.getShareURL(share);
 };
 </script>
+
+<style scoped>
+.share-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0;
+  gap: 0.5rem;
+}
+.share-qr__url {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  word-break: break-all;
+  text-align: center;
+  max-width: 100%;
+}
+</style>

@@ -28,7 +28,7 @@
                 class="action"
                 :aria-label="$t('buttons.copyToClipboard')"
                 :title="$t('buttons.copyToClipboard')"
-                @click="copyToClipboard(buildLink(link))"
+                @click="copyToClipboard(buildLink(link)); qrLink = buildLink(link)"
               >
                 <i class="material-icons">content_paste</i>
               </button>
@@ -56,6 +56,11 @@
             </td>
           </tr>
         </table>
+      </div>
+
+      <div v-if="qrLink" class="share-qr">
+        <qrcode-vue :value="qrLink" :size="160" level="M"></qrcode-vue>
+        <div class="share-qr__url">{{ qrLink }}</div>
       </div>
 
       <div class="card-action">
@@ -148,9 +153,13 @@ import * as api from "@/api/index";
 import dayjs from "dayjs";
 import { useLayoutStore } from "@/stores/layout";
 import { copy } from "@/utils/clipboard";
+import QrcodeVue from "qrcode.vue";
 
 export default {
   name: "share",
+  components: {
+    QrcodeVue,
+  },
   data: function () {
     return {
       time: 0,
@@ -159,6 +168,7 @@ export default {
       clip: null,
       password: "",
       listing: true,
+      qrLink: "",
     };
   },
   inject: ["$showError", "$showSuccess"],
@@ -190,6 +200,8 @@ export default {
 
       if (this.links.length == 0) {
         this.listing = false;
+      } else if (this.links[0]) {
+        this.qrLink = this.buildLink(this.links[0]);
       }
     } catch (e) {
       this.$showError(e);
@@ -240,6 +252,7 @@ export default {
         this.unit = "hours";
         this.password = "";
 
+        this.qrLink = this.buildLink(res);
         this.listing = true;
       } catch (e) {
         this.$showError(e);
@@ -290,3 +303,20 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.share-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0;
+  gap: 0.5rem;
+}
+.share-qr__url {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  word-break: break-all;
+  text-align: center;
+  max-width: 100%;
+}
+</style>
