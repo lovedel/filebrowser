@@ -49,7 +49,7 @@ export default defineConfig(({ command }) => {
       build: {
         rollupOptions: {
           input: {
-            index: path.resolve(__dirname, "./public/index.html"),
+            "public/index": path.resolve(__dirname, "./public/index.html"),
           },
           output: {
             manualChunks: (id) => {
