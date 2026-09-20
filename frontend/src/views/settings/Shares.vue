@@ -54,8 +54,11 @@
           </table>
 
           <div v-if="qrLink" class="share-qr">
-            <qrcode-vue :value="qrLink" :size="160" level="M"></qrcode-vue>
+            <qrcode-vue :value="qrLink" :size="160" level="M" renderAs="canvas"></qrcode-vue>
             <div class="share-qr__url">{{ qrLink }}</div>
+            <button class="button button--flat button--blue" @click="downloadQR">
+              <i class="material-icons">download</i> {{ t("buttons.download") }}
+            </button>
           </div>
         </div>
         <h2 class="message" v-else>
@@ -158,6 +161,16 @@ const deleteLink = async (event: Event, link: any) => {
 };
 const humanTime = (time: number) => {
   return dayjs(time * 1000).fromNow();
+};
+
+const downloadQR = () => {
+  const canvas = document.querySelector(".share-qr canvas") as HTMLCanvasElement;
+  if (canvas) {
+    const link = document.createElement("a");
+    link.download = "qrcode.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  }
 };
 
 const selectShare = (share: Share) => {

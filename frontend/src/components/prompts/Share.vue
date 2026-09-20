@@ -59,8 +59,11 @@
       </div>
 
       <div v-if="qrLink" class="share-qr">
-        <qrcode-vue :value="qrLink" :size="160" level="M"></qrcode-vue>
+        <qrcode-vue :value="qrLink" :size="160" level="M" renderAs="canvas"></qrcode-vue>
         <div class="share-qr__url">{{ qrLink }}</div>
+        <button class="button button--flat button--blue" @click="downloadQR">
+          <i class="material-icons">download</i> {{ $t("buttons.download") }}
+        </button>
       </div>
 
       <div class="card-action">
@@ -292,6 +295,15 @@ export default {
         if (b.expire === 0) return 1;
         return new Date(a.expire) - new Date(b.expire);
       });
+    },
+    downloadQR() {
+      const canvas = this.$el.querySelector(".share-qr canvas");
+      if (canvas) {
+        const link = document.createElement("a");
+        link.download = "qrcode.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }
     },
     switchListing() {
       if (this.links.length == 0 && !this.listing) {
