@@ -219,6 +219,7 @@
               style="height: 12em; padding: 0; margin: 0"
               :src="raw"
               controls
+              autoplay
             >
               Sorry, your browser doesn't support embedded videos, but don't
               worry, you can <a :href="raw">download it</a>
@@ -418,6 +419,12 @@ const fetchData = async () => {
     token.value = file.token || "";
 
     fileStore.updateRequest(file);
+
+    // Auto-select single video file so it renders in the player
+    if (!file.isDir && file.type === "video") {
+      fileStore.selected = [0];
+    }
+
     document.title = `${file.name} - ${document.title}`;
   } catch (err) {
     if (err instanceof Error) {
